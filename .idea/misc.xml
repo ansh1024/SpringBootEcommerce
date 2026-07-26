@@ -4,7 +4,7 @@
   <component name="MavenProjectsManager">
     <option name="originalFiles">
       <list>
-        <option value="$PROJECT_DIR$/ecom-webproj/ecom-webproj/pom.xml" />
+        <option value="$PROJECT_DIR$/backend/ecom-backend/ecom-webproj/pom.xml" />
       </list>
     </option>
   </component>

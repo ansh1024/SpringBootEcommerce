@@ -21,26 +21,35 @@ export const AppProvider = ({ children }) => {
   const addToCart = (product) => {
     const existingProductIndex = cart.findIndex((item) => item.id === product.id);
     if (existingProductIndex !== -1) {
-      const updatedCart = cart.map((item, index) =>
-        index === existingProductIndex
-          ? { ...item, quantity: item.quantity + 1 }
-          : item
-      );
+      const updatedCart = cart.map((item, index) => {
+        if (index !== existingProductIndex) return item;
+        if (item.quantity >= item.stockQuantity) {
+          alert("Cannot add more than available stock");
+          return item;
+        }
+        return { ...item, quantity: item.quantity + 1 };
+      });
       setCart(updatedCart);
       localStorage.setItem('cart', JSON.stringify(updatedCart));
     } else {
-      const updatedCart = [...cart, { ...product, quantity: 1 }];
+      // product.quantity is the STOCK quantity coming from the backend.
+      // Keep it as stockQuantity so it doesn't collide with the cart's
+      // own "how many did the user add" quantity below.
+      const updatedCart = [
+        ...cart,
+        { ...product, stockQuantity: product.quantity, quantity: 1 },
+      ];
       setCart(updatedCart);
       localStorage.setItem('cart', JSON.stringify(updatedCart));
     }
   };
 
   const removeFromCart = (productId) => {
-    console.log("productID",productId)
-    const updatedCart = cart.filter((item) => item.id !== productId);
+    // productId may arrive as a string (e.g. from useParams) or a number
+    // (from a product object), so compare loosely by normalizing both.
+    const updatedCart = cart.filter((item) => Number(item.id) !== Number(productId));
     setCart(updatedCart);
     localStorage.setItem('cart', JSON.stringify(updatedCart));
-    console.log("CART",cart)
   };
 
   const refreshData = async () => {

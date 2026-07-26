@@ -2,6 +2,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useContext, useEffect, useState } from "react";
 import AppContext from "../Context/Context";
 import axios from "../axios";
+import { getProductImageUrl } from "../config";
 
 const Product = () => {
   const { id } = useParams();
@@ -33,6 +34,7 @@ const Product = () => {
   };
 
   const deleteProduct = async () => {
+    if (!window.confirm("Delete this product? This cannot be undone.")) return;
     try {
       await axios.delete(`/products/${id}`);
       removeFromCart(id);
@@ -46,33 +48,32 @@ const Product = () => {
 
   if (!product) {
     return (
-      <h2 className="text-center" style={{ padding: "10rem" }}>
-        Loading...
-      </h2>
+      <div className="state-message">
+        <h3>Loading product...</h3>
+      </div>
     );
   }
 
   return (
-    <div className="containers">
-      <img
-        className="left-column-img"
-        src={`http://localhost:8080/api/products/${id}/image`}
-        alt={product.name}
-        onError={(e) => {
-          e.target.src = "https://via.placeholder.com/400x400?text=No+Image";
-        }}
-      />
+    <div className="product-page">
+      <div className="product-detail-image">
+        <img
+          src={getProductImageUrl(id)}
+          alt={product.name}
+          onError={(e) => {
+            e.target.src = "https://via.placeholder.com/500x500?text=No+Image";
+          }}
+        />
+      </div>
 
-      <div className="right-column">
-        <div className="product-description">
-          <span>{product.category}</span>
-          <h1>{product.name}</h1>
-          <h5>{product.brand}</h5>
-          <p>{product.desc}</p>
-        </div>
+      <div className="product-detail-info">
+        <span className="product-category-tag">{product.category}</span>
+        <h1>{product.name}</h1>
+        <h5 className="product-detail-brand">{product.brand}</h5>
+        <p className="product-detail-desc">{product.desc}</p>
 
-        <div className="product-price">
-          <span>${product.price}</span>
+        <div className="product-detail-price-box">
+          <span className="product-detail-price">${product.price}</span>
 
           <button
             className={`cart-btn ${!product.available ? "disabled-btn" : ""}`}
@@ -82,33 +83,24 @@ const Product = () => {
             {product.available ? "Add to Cart" : "Out of Stock"}
           </button>
 
-          <h6>
-            Stock Available :{" "}
-            <i style={{ color: "green", fontWeight: "bold" }}>
+          <p className="stock-line">
+            Stock available:{" "}
+            <strong className={product.quantity > 0 ? "in-stock" : "no-stock"}>
               {product.quantity}
-            </i>
-          </h6>
+            </strong>
+          </p>
 
           <p className="release-date">
-            <strong>Product listed on:</strong>{" "}
-            {new Date(product.releaseDate).toLocaleDateString()}
+            Listed on {new Date(product.releaseDate).toLocaleDateString()}
           </p>
 
           <div className="update-button">
-            <button
-              className="btn btn-primary"
-              type="button"
-              onClick={handleEditClick}
-            >
-              Update
+            <button className="btn btn-outline-primary" type="button" onClick={handleEditClick}>
+              <i className="bi bi-pencil-square"></i> Update
             </button>
 
-            <button
-              className="btn btn-danger"
-              type="button"
-              onClick={deleteProduct}
-            >
-              Delete
+            <button className="btn btn-outline-danger" type="button" onClick={deleteProduct}>
+              <i className="bi bi-trash3"></i> Delete
             </button>
           </div>
         </div>
